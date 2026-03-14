@@ -27,3 +27,8 @@ spring:
 
 server:
   port: 8080
+
+duffel:
+  api:
+    token: ${DUFFEL_API_TOKEN}
+    base-url: https://api.duffel.com
