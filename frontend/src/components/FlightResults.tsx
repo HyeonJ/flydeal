@@ -1,8 +1,7 @@
-import type { FlightOffer } from '../types/flight'
 import { FlightCard } from './FlightCard'
 
 interface FlightResultsProps {
-  offers: FlightOffer[]
+  offers: any[]
   loading: boolean
   error: string | null
   searched: boolean
@@ -45,8 +44,8 @@ export function FlightResults({ offers, loading, error, searched }: FlightResult
   return (
     <div className="results-list">
       <p className="results-count">{offers.length}개의 항공편이 검색됐어요</p>
-      {offers.map((offer) => (
-        <FlightCard key={offer.id} offer={offer} />
+      {offers.map((offer, idx) => (
+        <FlightCard key={offer.offerId || idx} offer={offer} />
       ))}
     </div>
   )
