@@ -18,7 +18,7 @@ function App() {
 
     try {
       const result = await searchFlights(params)
-      setOffers(result.data ?? [])
+      setOffers((result as any).offers ?? result.data ?? [])
     } catch (err) {
       setError(err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.')
       setOffers([])
