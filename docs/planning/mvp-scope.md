@@ -41,14 +41,16 @@
 
 ### Kiwi Tequila API (MVP)
 - `GET /v2/search` — 항공편 검색 (편도/왕복)
+  - 유연 검색 파라미터: `fly_days`, `ret_fly_days`, `nights_in_dst_from/to`, `date_from/to` 범위
 - `GET /locations` — 공항/도시 자동완성
 
 ## 화면 구성
 
 ### 1. 검색 페이지 (/)
+- **여정 타입**: 왕복 / 편도
 - 출발지 입력 (공항 자동완성)
 - 도착지 입력 (공항 자동완성)
-- **검색 모드 전환**: 날짜 지정 / 유연한 날짜
+- **검색 모드 전환**: 날짜 지정 / 유연한 날짜 (왕복 시만 표시)
   - 날짜 지정: 출발일 / 귀국일 (달력)
   - 유연한 날짜: 요일 패턴(금~월, 토~일 등) + 기간(2박3일, 3박4일 등) + 기간 범위(2026년 전체 / 특정 월)
 - 승객 수
@@ -90,6 +92,7 @@ origin: String (IATA 코드)
 destination: String (IATA 코드)
 departureDate: LocalDate
 returnDate: LocalDate? (편도면 null)
+flightType: String (round/oneway)
 passengers: int
 cabinClass: String (economy/business)
 ```

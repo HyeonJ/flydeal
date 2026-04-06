@@ -7,6 +7,8 @@ Duffel API(FSC) + Kiwi Tequila API(LCC) 이중 연동으로 한국 항공사 전
 
 - **제품 기획서**: `docs/planning/product-spec.md`
 - **MVP 범위**: `docs/planning/mvp-scope.md`
+- **API 연동 가이드**: `docs/planning/api-integration.md` — Duffel/Kiwi 요청·응답 예시, Spring Boot 구현 패턴, 결과 병합, Redis 캐싱, 에러 fallback
+- **UI 와이어프레임**: `docs/planning/wireframe.md` — 3개 화면 ASCII 와이어프레임, 모바일 반응형, React 컴포넌트 구조
 - **리서치**: `docs/research/`
 
 ## 기술 스택
