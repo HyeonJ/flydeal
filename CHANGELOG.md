@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Added
+- SerpApi Mock 클라이언트 (한국 LCC 5개사: 제주항공, 진에어, 티웨이, 에어부산, 에어서울)
+  - 12개 노선 템플릿 기반 Mock 데이터 생성 (serpapi.mock=true 기본)
+  - LccClient 인터페이스로 Mock/Real 전환 가능
+  - SerpApiClient 껍데기 (실제 연동 시 serpapi.mock=false로 전환)
+- Duffel + LCC 병렬 검색 — FlightSearchService에서 CompletableFuture 병렬 호출 후 결과 병합
+
+### Changed
+- Kiwi API 설정을 SerpApi로 교체 (RestClientConfig, application.yml)
+- .gitignore에 backend/gradle.properties 추가 (로컬 JAVA_HOME 경로 제외)
+- Line ending 정규화 (.gitattributes 기반 CRLF → LF)
+
 ## [0.2.0] - 2026-04-06
 
 ### Changed
