@@ -15,7 +15,9 @@
 
 | 기능 | 설명 | API |
 |------|------|-----|
+| **유연한 날짜 검색** | **요일 패턴(금~월) + 기간(3박4일) + 연도 → 최저가 날짜 조합 탐색** | **Kiwi** |
 | 항공편 검색 | 출발지/도착지/날짜/인원 입력 → 검색 | Duffel + Kiwi |
+| 날짜별 가격 리스트 | 조건에 맞는 모든 날짜 조합을 가격순 정렬 | - |
 | 결과 리스트 | 가격순/시간순 정렬 | - |
 | 필터 | 직항/경유, 항공사, 가격 범위 | - |
 | 항공편 카드 | 항공사, 출발/도착 시간, 가격, 경유 정보 | - |
@@ -46,12 +48,22 @@
 ### 1. 검색 페이지 (/)
 - 출발지 입력 (공항 자동완성)
 - 도착지 입력 (공항 자동완성)
-- 출발일 / 귀국일 (달력)
+- **검색 모드 전환**: 날짜 지정 / 유연한 날짜
+  - 날짜 지정: 출발일 / 귀국일 (달력)
+  - 유연한 날짜: 요일 패턴(금~월, 토~일 등) + 기간(2박3일, 3박4일 등) + 기간 범위(2026년 전체 / 특정 월)
 - 승객 수
 - 좌석 등급 (이코노미/비즈니스)
 - 검색 버튼
 
-### 2. 결과 페이지 (/search)
+### 2-A. 유연한 날짜 결과 페이지 (/search/flexible)
+- 조건에 맞는 날짜 조합을 가격순 정렬 리스트
+  - 날짜 범위 (예: 5/22 금 ~ 5/25 월)
+  - 최저가 (KRW)
+  - 항공사
+  - 직항/경유
+- 날짜 조합 클릭 → 해당 날짜의 상세 항공편 리스트로 이동
+
+### 2-B. 결과 페이지 (/search)
 - 검색 조건 요약
 - 필터 사이드바 (직항/경유, 항공사, 가격 범위, 출발 시간대)
 - 정렬 (최저가/최단시간/추천순)
@@ -67,6 +79,7 @@
 | Method | Path | 설명 |
 |--------|------|------|
 | POST | /api/flights/search | 항공편 검색 (Duffel + Kiwi 병렬 호출 → 병합) |
+| POST | /api/flights/search/flexible | 유연한 날짜 검색 (요일 패턴+기간 → 최저가 날짜 조합) |
 | GET | /api/airports/search?q= | 공항 자동완성 |
 
 ## 데이터 모델
@@ -79,6 +92,30 @@ departureDate: LocalDate
 returnDate: LocalDate? (편도면 null)
 passengers: int
 cabinClass: String (economy/business)
+```
+
+### FlexibleSearchRequest
+```
+origin: String (IATA 코드)
+destination: String (IATA 코드)
+departureWeekday: DayOfWeek (출발 요일, 예: FRIDAY)
+returnWeekday: DayOfWeek (귀국 요일, 예: MONDAY)
+nights: int (숙박 수, 예: 3)
+dateFrom: LocalDate (검색 시작 범위, 예: 2026-01-01)
+dateTo: LocalDate (검색 끝 범위, 예: 2026-12-31)
+passengers: int
+cabinClass: String (economy/business)
+```
+
+### FlexibleSearchResult
+```
+departureDate: LocalDate
+returnDate: LocalDate
+cheapestPrice: BigDecimal
+currency: String (KRW)
+airline: String
+stops: int
+offerId: String (상세 검색용)
 ```
 
 ### FlightOffer
@@ -100,6 +137,8 @@ deepLink: String? (Kiwi 예약 링크)
 
 ## 완료 기준
 
+- [ ] **유연한 날짜 검색이 동작한다** (요일+기간 → 최저가 날짜 조합 리스트)
+- [ ] 날짜 조합 클릭 → 해당 날짜 상세 항공편 리스트 표시
 - [ ] Duffel sandbox로 항공편 검색이 동작한다
 - [ ] Kiwi API로 한국 LCC 항공편이 검색된다
 - [ ] 두 API 결과가 하나의 리스트로 병합/정렬된다
