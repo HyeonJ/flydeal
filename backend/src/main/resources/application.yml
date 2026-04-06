@@ -1,15 +1,10 @@
-spring:
-  autoconfigure:
-    exclude:
-      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
-      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
-      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
-      - org.springframework.boot.autoconfigure.mail.MailSenderAutoConfiguration
-
 server:
   port: 8081
 
 duffel:
-  api:
-    token: ${DUFFEL_API_TOKEN}
-    base-url: https://api.duffel.com
+  api-token: ${DUFFEL_API_TOKEN}
+  base-url: https://api.duffel.com
+
+kiwi:
+  api-key: ${KIWI_API_KEY:}
+  base-url: https://api.tequila.kiwi.com
