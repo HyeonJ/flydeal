@@ -1,13 +1,14 @@
 import { FlightCard } from './FlightCard'
+import type { FlightSearchResult } from '../types/flight'
 
 interface FlightResultsProps {
-  offers: any[]
+  result: FlightSearchResult | null
   loading: boolean
   error: string | null
   searched: boolean
 }
 
-export function FlightResults({ offers, loading, error, searched }: FlightResultsProps) {
+export function FlightResults({ result, loading, error, searched }: FlightResultsProps) {
   if (loading) {
     return (
       <div className="results-state">
@@ -25,27 +26,34 @@ export function FlightResults({ offers, loading, error, searched }: FlightResult
     )
   }
 
-  if (!searched) {
+  if (!searched || !result) {
     return (
       <div className="results-state placeholder">
-        <p>출발지, 목적지, 날짜를 입력하고 검색해보세요.</p>
+        <p>출발지, 도착지, 날짜를 입력하고 검색해보세요.</p>
       </div>
     )
   }
 
-  if (offers.length === 0) {
+  if (result.offers.length === 0) {
     return (
       <div className="results-state">
-        <p>검색 결과가 없습니다.</p>
+        <p>검색 결과가 없습니다. 다른 날짜나 목적지로 검색해보세요.</p>
       </div>
     )
   }
 
   return (
     <div className="results-list">
-      <p className="results-count">{offers.length}개의 항공편이 검색됐어요</p>
-      {offers.map((offer, idx) => (
-        <FlightCard key={offer.offerId || idx} offer={offer} />
+      {result.warnings && result.warnings.length > 0 && (
+        <div className="results-warning">
+          {result.warnings.map((w, i) => <p key={i}>{w}</p>)}
+        </div>
+      )}
+      <p className="results-count">
+        {result.totalCount}개의 항공편 · {result.sources.join(' + ')}
+      </p>
+      {result.offers.map((offer) => (
+        <FlightCard key={offer.id} offer={offer} />
       ))}
     </div>
   )

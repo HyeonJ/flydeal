@@ -1,14 +1,4 @@
-interface FlightOffer {
-  offerId: string
-  totalAmount: string
-  totalCurrency: string
-  airline: string
-  departureTime: string
-  arrivalTime: string
-  origin: string
-  destination: string
-  stops: number
-}
+import type { FlightOffer } from '../types/flight'
 
 interface FlightCardProps {
   offer: FlightOffer
@@ -37,14 +27,29 @@ function formatDate(isoString: string): string {
   }
 }
 
+function formatDuration(minutes: number): string {
+  const h = Math.floor(minutes / 60)
+  const m = minutes % 60
+  return `${h}시간 ${m}분`
+}
+
+function formatPrice(price: number): string {
+  return price.toLocaleString('ko-KR')
+}
+
 export function FlightCard({ offer }: FlightCardProps) {
   return (
     <div className="flight-card">
       <div className="flight-card-header">
-        <div className="airline-name">{offer.airline || '항공사'}</div>
+        <div className="airline-info">
+          {offer.airlineLogo && (
+            <img src={offer.airlineLogo} alt={offer.airline} className="airline-logo" />
+          )}
+          <span className="airline-name">{offer.airline || '항공사'}</span>
+        </div>
         <div className="price">
-          <span className="price-amount">${Number(offer.totalAmount).toLocaleString()}</span>
-          <span className="price-currency"> {offer.totalCurrency}</span>
+          <span className="price-amount">₩{formatPrice(offer.price)}</span>
+          <span className="source-badge">{offer.source}</span>
         </div>
       </div>
 
@@ -57,6 +62,7 @@ export function FlightCard({ offer }: FlightCardProps) {
           </div>
 
           <div className="flight-path">
+            <div className="duration">{formatDuration(offer.durationMinutes)}</div>
             <div className="path-line">
               <span className="dot" />
               <span className="line" />

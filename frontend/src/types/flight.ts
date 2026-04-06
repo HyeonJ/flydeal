@@ -1,42 +1,39 @@
-export interface FlightSegment {
-  departureAirport: string
-  arrivalAirport: string
-  departureTime: string
-  arrivalTime: string
-  carrierCode: string
-  flightNumber: string
-  duration: string
-}
-
-export interface FlightItinerary {
-  segments: FlightSegment[]
-  duration: string
-}
-
-export interface FlightPrice {
-  totalAmount: string
-  currency: string
-}
-
 export interface FlightOffer {
   id: string
+  source: 'DUFFEL' | 'KIWI'
   airline: string
-  price: FlightPrice
-  itineraries: FlightItinerary[]
-  numberOfStops: number
-  validatingAirlineCodes?: string[]
+  airlineLogo: string | null
+  departureTime: string
+  arrivalTime: string
+  origin: string
+  destination: string
+  durationMinutes: number
+  stops: number
+  price: number
+  currency: string
+  deepLink: string | null
 }
 
-export interface FlightSearchParams {
+export interface FlightSearchRequest {
   origin: string
   destination: string
   departureDate: string
   returnDate?: string
+  flightType: 'round' | 'oneway'
+  passengers: number
+  cabinClass: 'economy' | 'business'
 }
 
-export interface FlightSearchResponse {
-  data: FlightOffer[]
-  meta?: {
-    count: number
-  }
+export interface FlightSearchResult {
+  offers: FlightOffer[]
+  sources: string[]
+  cached: boolean
+  totalCount: number
+  warnings?: string[]
+}
+
+export interface ApiResponse<T> {
+  success: boolean
+  data?: T
+  message?: string
 }
