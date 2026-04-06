@@ -1,37 +1,33 @@
 package com.flydeal.backend.controller;
 
+import com.flydeal.backend.dto.ApiResponse;
 import com.flydeal.backend.dto.FlightSearchRequest;
-import com.flydeal.backend.dto.FlightSearchResponse;
+import com.flydeal.backend.dto.FlightSearchResult;
 import com.flydeal.backend.service.FlightSearchService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RestController
-@RequestMapping("/api/search")
+@RequestMapping("/api/flights")
 @RequiredArgsConstructor
 public class FlightSearchController {
 
     private final FlightSearchService flightSearchService;
 
-    @GetMapping("/flights")
-    public ResponseEntity<FlightSearchResponse> searchFlights(
-            @RequestParam String origin,
-            @RequestParam String destination,
-            @RequestParam String departureDate,
-            @RequestParam(required = false) String returnDate,
-            @RequestParam(defaultValue = "1") int passengers
-    ) {
-        FlightSearchRequest request = new FlightSearchRequest();
-        request.setOrigin(origin);
-        request.setDestination(destination);
-        request.setDepartureDate(departureDate);
-        request.setReturnDate(returnDate);
-        request.setPassengers(passengers);
+    @PostMapping("/search")
+    public ResponseEntity<ApiResponse<FlightSearchResult>> searchFlights(
+            @Valid @RequestBody FlightSearchRequest request) {
+        log.info("[POST /api/flights/search] origin={}, destination={}, departureDate={}",
+                request.getOrigin(), request.getDestination(), request.getDepartureDate());
 
-        return ResponseEntity.ok(flightSearchService.search(request));
+        FlightSearchResult result = flightSearchService.search(request);
+        return ResponseEntity.ok(ApiResponse.success(result));
     }
 }

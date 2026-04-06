@@ -1,87 +1,84 @@
 package com.flydeal.backend.service;
 
-import com.flydeal.backend.client.DuffelApiClient;
+import com.flydeal.backend.client.DuffelClient;
+import com.flydeal.backend.dto.FlightOffer;
 import com.flydeal.backend.dto.FlightSearchRequest;
-import com.flydeal.backend.dto.FlightSearchResponse;
+import com.flydeal.backend.dto.FlightSearchResult;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class FlightSearchService {
 
-    private final DuffelApiClient duffelApiClient;
+    private final DuffelClient duffelClient;
 
-    public FlightSearchResponse search(FlightSearchRequest request) {
-        Map<String, Object> apiResponse = duffelApiClient.searchOffers(request);
+    public FlightSearchResult search(FlightSearchRequest request) {
+        log.info("[search] origin={}, destination={}, departureDate={}, returnDate={}",
+                request.getOrigin(), request.getDestination(),
+                request.getDepartureDate(), request.getReturnDate());
 
-        List<FlightSearchResponse.FlightOffer> offers = new ArrayList<>();
+        List<String> sources = new ArrayList<>();
+        List<String> warnings = new ArrayList<>();
 
-        if (apiResponse != null && apiResponse.containsKey("data")) {
-            Map<String, Object> data = (Map<String, Object>) apiResponse.get("data");
-            List<Map<String, Object>> rawOffers = (List<Map<String, Object>>) data.get("offers");
+        CompletableFuture<List<FlightOffer>> duffelFuture = CompletableFuture
+                .supplyAsync(() -> duffelClient.searchFlights(request))
+                .orTimeout(15, TimeUnit.SECONDS)
+                .exceptionally(ex -> {
+                    log.error("[search] Duffel API 실패", ex);
+                    warnings.add("Duffel API 일시 장애로 FSC 항공편이 포함되지 않았습니다");
+                    return List.of();
+                });
 
-            if (rawOffers != null) {
-                for (Map<String, Object> raw : rawOffers) {
-                    offers.add(mapOffer(raw));
-                }
-            }
+        List<FlightOffer> duffelOffers = duffelFuture.join();
+        if (!duffelOffers.isEmpty()) {
+            sources.add("DUFFEL");
         }
 
-        return FlightSearchResponse.builder()
-                .offers(offers)
+        List<FlightOffer> merged = new ArrayList<>(duffelOffers);
+
+        List<FlightOffer> deduplicated = deduplicate(merged);
+        deduplicated.sort(Comparator.comparing(FlightOffer::getPrice));
+
+        return FlightSearchResult.builder()
+                .offers(deduplicated)
+                .sources(sources)
+                .cached(false)
+                .totalCount(deduplicated.size())
+                .warnings(warnings.isEmpty() ? null : warnings)
                 .build();
     }
 
-    private FlightSearchResponse.FlightOffer mapOffer(Map<String, Object> raw) {
-        List<Map<String, Object>> slices = (List<Map<String, Object>>) raw.get("slices");
+    private List<FlightOffer> deduplicate(List<FlightOffer> offers) {
+        Set<String> seen = new HashSet<>();
+        List<FlightOffer> result = new ArrayList<>();
 
-        String airline = "";
-        String departureTime = "";
-        String arrivalTime = "";
-        String origin = "";
-        String destination = "";
-        int stops = 0;
-
-        if (slices != null && !slices.isEmpty()) {
-            Map<String, Object> firstSlice = slices.get(0);
-            List<Map<String, Object>> segments = (List<Map<String, Object>>) firstSlice.get("segments");
-            stops = segments != null ? Math.max(0, segments.size() - 1) : 0;
-
-            if (segments != null && !segments.isEmpty()) {
-                Map<String, Object> firstSeg = segments.get(0);
-                Map<String, Object> lastSeg = segments.get(segments.size() - 1);
-
-                Map<String, Object> carrier = (Map<String, Object>) firstSeg.get("marketing_carrier");
-                if (carrier != null) {
-                    airline = (String) carrier.get("name");
-                }
-
-                Map<String, Object> originMap = (Map<String, Object>) firstSeg.get("origin");
-                if (originMap != null) origin = (String) originMap.get("iata_code");
-
-                Map<String, Object> destMap = (Map<String, Object>) lastSeg.get("destination");
-                if (destMap != null) destination = (String) destMap.get("iata_code");
-
-                departureTime = (String) firstSeg.get("departing_at");
-                arrivalTime = (String) lastSeg.get("arriving_at");
+        for (FlightOffer offer : offers) {
+            String key = deduplicationKey(offer);
+            if (seen.add(key)) {
+                result.add(offer);
             }
         }
 
-        return FlightSearchResponse.FlightOffer.builder()
-                .offerId((String) raw.get("id"))
-                .totalAmount((String) raw.get("total_amount"))
-                .totalCurrency((String) raw.get("total_currency"))
-                .airline(airline)
-                .departureTime(departureTime)
-                .arrivalTime(arrivalTime)
-                .origin(origin)
-                .destination(destination)
-                .stops(stops)
-                .build();
+        return result;
+    }
+
+    private String deduplicationKey(FlightOffer offer) {
+        return offer.getAirline()
+                + "|" + offer.getDepartureTime().truncatedTo(ChronoUnit.MINUTES)
+                + "|" + offer.getArrivalTime().truncatedTo(ChronoUnit.MINUTES)
+                + "|" + offer.getOrigin()
+                + "|" + offer.getDestination();
     }
 }
