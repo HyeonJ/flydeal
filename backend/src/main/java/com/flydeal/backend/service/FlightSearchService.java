@@ -1,6 +1,7 @@
 package com.flydeal.backend.service;
 
 import com.flydeal.backend.client.DuffelClient;
+import com.flydeal.backend.client.LccClient;
 import com.flydeal.backend.dto.FlightOffer;
 import com.flydeal.backend.dto.FlightSearchRequest;
 import com.flydeal.backend.dto.FlightSearchResult;
@@ -23,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 public class FlightSearchService {
 
     private final DuffelClient duffelClient;
+    private final LccClient lccClient;
 
     public FlightSearchResult search(FlightSearchRequest request) {
         log.info("[search] origin={}, destination={}, departureDate={}, returnDate={}",
@@ -41,12 +43,23 @@ public class FlightSearchService {
                     return List.of();
                 });
 
+        CompletableFuture<List<FlightOffer>> lccFuture = CompletableFuture
+                .supplyAsync(() -> lccClient.searchFlights(request))
+                .orTimeout(15, TimeUnit.SECONDS)
+                .exceptionally(ex -> {
+                    log.error("[search] LCC API 실패", ex);
+                    warnings.add("LCC API 일시 장애로 저비용 항공편이 포함되지 않았습니다");
+                    return List.of();
+                });
+
         List<FlightOffer> duffelOffers = duffelFuture.join();
-        if (!duffelOffers.isEmpty()) {
-            sources.add("DUFFEL");
-        }
+        List<FlightOffer> lccOffers = lccFuture.join();
+
+        if (!duffelOffers.isEmpty()) sources.add("DUFFEL");
+        if (!lccOffers.isEmpty()) sources.add("SERPAPI");
 
         List<FlightOffer> merged = new ArrayList<>(duffelOffers);
+        merged.addAll(lccOffers);
 
         List<FlightOffer> deduplicated = deduplicate(merged);
         deduplicated.sort(Comparator.comparing(FlightOffer::getPrice));

@@ -17,11 +17,11 @@ public class RestClientConfig {
     @Value("${duffel.base-url}")
     private String duffelBaseUrl;
 
-    @Value("${kiwi.api-key:}")
-    private String kiwiApiKey;
+    @Value("${serpapi.api-key:}")
+    private String serpApiKey;
 
-    @Value("${kiwi.base-url}")
-    private String kiwiBaseUrl;
+    @Value("${serpapi.base-url}")
+    private String serpApiBaseUrl;
 
     @Bean
     public RestClient duffelRestClient() {
@@ -34,10 +34,9 @@ public class RestClientConfig {
     }
 
     @Bean
-    public RestClient kiwiRestClient() {
+    public RestClient serpApiRestClient() {
         return RestClient.builder()
-                .baseUrl(kiwiBaseUrl)
-                .defaultHeader("apikey", kiwiApiKey)
+                .baseUrl(serpApiBaseUrl)
                 .requestFactory(clientHttpRequestFactory())
                 .build();
     }

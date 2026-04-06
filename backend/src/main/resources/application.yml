@@ -5,6 +5,7 @@ duffel:
   api-token: ${DUFFEL_API_TOKEN}
   base-url: https://api.duffel.com
 
-kiwi:
-  api-key: ${KIWI_API_KEY:}
-  base-url: https://api.tequila.kiwi.com
+serpapi:
+  api-key: ${SERPAPI_API_KEY:}
+  base-url: https://serpapi.com
+  mock: true
