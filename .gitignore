@@ -43,6 +43,9 @@ frontend/.env.*.local
 .env.*
 !.env.example
 
+# Claude Code
+.claude/settings.local.json
+
 # Logs
 *.log
 logs/
