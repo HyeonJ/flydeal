@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.2.0] - 2026-04-06
+
+### Changed
+- 백엔드 DTO/Config를 기획 문서(mvp-scope.md) 기준으로 전면 재설계
+  - FlightOffer, FlightSearchRequest, FlightSearchResult, ApiResponse DTO
+  - RestTemplate → RestClient 전환 (타임아웃 connect 5초, read 10초)
+  - GlobalExceptionHandler 추가
+- DuffelClient 재작성 — 왕복 슬라이스, cabin_class, 타입 안전 매핑
+- Controller: GET → POST /api/flights/search, @Valid 입력 검증
+- 프론트엔드 타입/API를 백엔드 DTO와 정렬
+- 불필요한 의존성 제거 (JPA, Redis, Mail — 사용 시점에 재추가)
+
+### Discovered
+- Kiwi Tequila API: MAU 50K 조건으로 가입 사실상 불가 → SerpApi 대안 검토 중
+- Duffel sandbox: 한국 LCC 미커버 확인
+
 ## [0.1.0] - 2026-03-29
 
 ### Added
