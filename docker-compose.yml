@@ -1,0 +1,25 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: flydeal-mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: flydeal
+      MYSQL_USER: flydeal
+      MYSQL_PASSWORD: flydeal
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+  redis:
+    image: redis:7-alpine
+    container_name: flydeal-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+
+volumes:
+  mysql-data:
+  redis-data:
