@@ -96,6 +96,11 @@ npm run dev
 - 한글 커밋 메시지 OK
 - 커밋 시 CHANGELOG.md 업데이트 필수
 
+### DB 마이그레이션
+- schema.sql 직접 관리 금지 — Flyway 사용
+- 마이그레이션 파일: `resources/db/migration/V1__description.sql` 형식
+- MVP는 Redis 캐싱 위주, MySQL 테이블은 필요할 때 추가
+
 ### 테스트
 - TDD 필수 — 기능 구현 전 테스트 먼저 작성
 - Backend: JUnit 5 + Spring Boot Test
