@@ -1,6 +1,13 @@
 # FlyDeal (플라이딜)
 
-항공편 가격 비교 서비스 — Duffel API로 항공편 검색, 최저가 알림 제공.
+한국어 AI 자연어 검색 기반 항공편 가격 비교 서비스.
+Duffel API(FSC) + Kiwi Tequila API(LCC) 이중 연동으로 한국 항공사 전체 커버.
+
+## 기획 문서
+
+- **제품 기획서**: `docs/planning/product-spec.md`
+- **MVP 범위**: `docs/planning/mvp-scope.md`
+- **리서치**: `docs/research/`
 
 ## 기술 스택
 
@@ -9,7 +16,7 @@
 | Backend | Spring Boot 3.2, Java 17, Gradle 8.6 (Kotlin DSL) |
 | Frontend | React 18, Vite 5, TypeScript 5 |
 | Database | MySQL 8, Redis 7 |
-| API | Duffel API (항공편 검색/예약) |
+| API | Duffel API (FSC/NDC), Kiwi Tequila API (LCC) |
 
 ## 프로젝트 구조
 
@@ -94,6 +101,14 @@ npm run dev
 
 ## API
 
-- Duffel API: https://duffel.com/docs
+### Duffel (FSC — 대한항공, 아시아나)
+- 문서: https://duffel.com/docs
+- SDK: `@duffel/api` (서버 전용)
 - Sandbox 모드로 개발 (실제 예약 불가, 가상 데이터)
 - Rate Limit: 분당 100 요청 (sandbox)
+
+### Kiwi Tequila (LCC — 제주항공, 진에어, 티웨이, 에어부산)
+- 문서: https://tequila.kiwi.com
+- 인증: apikey 헤더
+- 검색 무료, 예약 시 3% 커미션
+- Virtual Interlining: 코드쉐어 없는 항공사 조합 가능
